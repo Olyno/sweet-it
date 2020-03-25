@@ -1,0 +1,38 @@
+name: Test & Build Nightly
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+
+      - name: Create app
+        run: |
+          flutter pub get
+          flutter test
+          flutter build appbundle
+          flutter build apk --split-per-abi
+        
+      - name: Upload nightly build
+        if: success()
+        uses: actions/upload-artifact@v1
+        with:
+          name: sweet-it
+          path: build/app/outputs/bundle/release
